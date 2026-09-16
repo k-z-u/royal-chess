@@ -829,8 +829,8 @@ class Searcher {
   search(maxDepth: number, randomness: number, window = 90): { move: number; score: number } {
     let bestMove = 0
     let bestScore = 0
-    let rootMoves: number[] = []
-    const scored: { move: number; score: number; order: number }[] = []
+    let rootOrder: number[] = []
+    let reachedDepth = 0
 
     for (let depth = 1; depth <= maxDepth; depth++) {
       const moves = legalMoves(this.st)
@@ -857,9 +857,8 @@ class Searcher {
 
       if (this.stopped) break
       if (iterationScores.length) {
-        scored.length = 0
-        scored.push(...iterationScores.sort((a, b) => b.score - a.score))
-        rootMoves = scored.map((s) => s.move)
+        rootOrder = ordered
+        reachedDepth = depth
         bestMove = localBest
         bestScore = localBestScore
       }
@@ -872,21 +871,43 @@ class Searcher {
       return { move: moves.length ? moves[0] : 0, score: 0 }
     }
 
-    // human-like imperfection: sometimes pick a slightly worse move
-    if (randomness > 0 && scored.length > 1) {
-      const pool: number[] = []
-      for (const s of scored) {
-        // keep moves within a window of the best score
-        if (bestScore - s.score < window) pool.push(s.move)
-        if (pool.length >= 4) break
+    // Human-like imperfection: sometimes pick a slightly worse move.
+    //
+    // The deepening loop scores every root move after the first with a null
+    // window, so those numbers are bounds, not evaluations — the losing moves
+    // all report the same value as the current best. Choosing from those would
+    // let the engine blunder away a queen. Re-evaluate the leading candidates
+    // with a full window (under a small, separate time allowance) so the pool
+    // holds moves that are genuinely close to the best.
+    if (randomness > 0 && !this.stopped) {
+      const exact: { move: number; score: number }[] = []
+      const savedStopAt = this.stopAt
+      this.stopAt = Math.min(this.stopAt, Date.now() + 250)
+      for (const m of rootOrder.slice(0, 6)) {
+        const u = makeMove(this.st, m)
+        const score = -this.negamax(Math.max(1, reachedDepth - 1), -INF, INF, 1)
+        unmakeMove(this.st, u)
+        if (this.stopped) break
+        exact.push({ move: m, score })
       }
-      if (pool.length > 1 && Math.random() < randomness) {
-        const pick = pool[1 + Math.floor(Math.random() * (pool.length - 1))]
-        if (pick) bestMove = pick
+      this.stopAt = savedStopAt
+      this.stopped = false
+
+      if (exact.length > 1) {
+        exact.sort((a, b) => b.score - a.score)
+        const pool: number[] = []
+        for (const s of exact) {
+          // keep moves within a window of the best score
+          if (exact[0].score - s.score < window) pool.push(s.move)
+          if (pool.length >= 4) break
+        }
+        if (pool.length > 1 && Math.random() < randomness) {
+          const pick = pool[1 + Math.floor(Math.random() * (pool.length - 1))]
+          if (pick) bestMove = pick
+        }
       }
     }
 
-    void rootMoves
     return { move: bestMove, score: bestScore }
   }
 }

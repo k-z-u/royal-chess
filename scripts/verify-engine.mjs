@@ -110,18 +110,40 @@ console.log('\ntactics')
 }
 {
   const fen = '4k3/8/8/3q4/8/8/8/3RK3 w - - 0 1'
-  const mv = findBestMove(fen, 2)
-  check(mv.to === 'd5', 'takes a hanging queen', `${mv.from}${mv.to}`)
+  // Repeated, across every level: the engine may add human-like imperfection,
+  // but a free queen is never within its "close call" window. This used to
+  // blunder here because the candidate pool was built from null-window bounds.
+  for (const diff of [1, 2, 3]) {
+    const seen = new Set()
+    for (let i = 0; i < 20; i++) {
+      const mv = findBestMove(fen, diff)
+      seen.add(`${mv.from}${mv.to}`)
+    }
+    check(
+      seen.size === 1 && seen.has('d1d5'),
+      `always takes a hanging queen d=${diff}`,
+      [...seen].join(' '),
+    )
+  }
 }
 {
   // must not hang the queen for nothing
   const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2'
-  const mv = findBestMove(fen, 3)
-  const c = new Chess(fen)
-  c.move({ from: mv.from, to: mv.to, promotion: mv.promotion })
-  const reply = c.moves({ verbose: true })
-  const losesQueen = reply.some((r) => r.captured === 'q')
-  check(!losesQueen, 'does not hang the queen', `${mv.from}${mv.to}`)
+  for (const diff of [1, 2, 3]) {
+    let safe = true
+    let worst = ''
+    for (let i = 0; i < 12; i++) {
+      const mv = findBestMove(fen, diff)
+      const c = new Chess(fen)
+      c.move({ from: mv.from, to: mv.to, promotion: mv.promotion })
+      const reply = c.moves({ verbose: true })
+      if (reply.some((r) => r.captured === 'q')) {
+        safe = false
+        worst = `${mv.from}${mv.to}`
+      }
+    }
+    check(safe, `does not hang the queen d=${diff}`, worst)
+  }
 }
 
 console.log('\nspeed')

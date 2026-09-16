@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import type { ThreeEvent } from '@react-three/fiber'
-import { frameRingGeometry, roundedPlateGeometry } from './plate'
+import { frameRingGeometry, plateTopFace, roundedPlateGeometry } from './plate'
 import type { SceneMaterials } from './materials'
 import { makeLabelStrip } from './textures'
 import { BOARD_HALF, isLightSquare, squareAt, squareToWorld } from '../game/squares'
@@ -14,6 +14,15 @@ const FRAME_TOP = 0.038
 const FRAME_HEIGHT = 0.52
 const SQUARE_TOP = 0
 const LABEL_RADIUS = FRAME_INNER / 2 + 0.35
+
+const SQUARE_PLATE = { width: 0.988, height: 0.07, radius: 0.02, bevel: 0.006 }
+
+/**
+ * World y of the surface the pieces stand on. Highlight overlays have to sit
+ * above this, otherwise the square plates draw over them and every hint on the
+ * board silently disappears.
+ */
+export const SURFACE_Y = SQUARE_TOP + plateTopFace(SQUARE_PLATE.height, SQUARE_PLATE.bevel)
 
 interface BoardProps {
   materials: SceneMaterials
@@ -109,9 +118,20 @@ function BoardBase({ materials, showCoordinates }: BoardProps) {
 
 function Squares({ materials }: { materials: SceneMaterials }) {
   const selectSquare = useGame((s) => s.selectSquare)
+  const setHoverSquare = useGame((s) => s.setHoverSquare)
   const hoverRef = useRef<THREE.Mesh>(null)
 
-  const geo = useMemo(() => roundedPlateGeometry(0.988, 0.988, 0.07, 0.02, 0.006), [])
+  const geo = useMemo(
+    () =>
+      roundedPlateGeometry(
+        SQUARE_PLATE.width,
+        SQUARE_PLATE.width,
+        SQUARE_PLATE.height,
+        SQUARE_PLATE.radius,
+        SQUARE_PLATE.bevel,
+      ),
+    [],
+  )
 
   const squares = useMemo(() => {
     const out: { sq: string; pos: [number, number, number]; light: boolean; alt: boolean }[] = []
@@ -152,18 +172,20 @@ function Squares({ materials }: { materials: SceneMaterials }) {
           onPointerOver={(e) => {
             e.stopPropagation()
             if (hoverRef.current) {
-              hoverRef.current.position.set(s.pos[0], 0.004, s.pos[2])
+              hoverRef.current.position.set(s.pos[0], SURFACE_Y + 0.002, s.pos[2])
               hoverRef.current.visible = true
             }
+            setHoverSquare(s.sq)
             document.body.style.cursor = 'pointer'
           }}
           onPointerOut={() => {
             if (hoverRef.current) hoverRef.current.visible = false
+            setHoverSquare(null)
             document.body.style.cursor = 'default'
           }}
         />
       ))}
-      <mesh ref={hoverRef} visible={false} renderOrder={2}>
+      <mesh ref={hoverRef} visible={false} renderOrder={2} raycast={() => null}>
         <planeGeometry args={[0.99, 0.99]} />
         <meshBasicMaterial
           color="#ffffff"

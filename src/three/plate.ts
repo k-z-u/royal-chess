@@ -1,6 +1,18 @@
 import * as THREE from 'three'
 
-/** A beveled rounded plate lying in the XZ plane, top surface at y = 0. */
+/**
+ * Height of a plate's top face above the plate's own origin.
+ *
+ * The extrusion runs upward from the shape and the bevel is applied at both
+ * ends, so a plate stands `2 * (height - bevel)` tall above its origin — not
+ * `height`. Anything drawn *on* a plate must clear this, or it ends up buried
+ * inside the geometry.
+ */
+export function plateTopFace(height: number, bevel = 0.01): number {
+  return 2 * (height - bevel)
+}
+
+/** A beveled rounded plate lying in the XZ plane. */
 export function roundedPlateGeometry(
   width: number,
   depth: number,

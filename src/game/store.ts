@@ -22,6 +22,7 @@ export interface Settings {
   sound: boolean
   coordinates: boolean
   hints: boolean
+  help: boolean
   theme: 'walnut' | 'charcoal' | 'marble'
   finish: 'classic' | 'stone' | 'brass'
   speed: number
@@ -32,6 +33,7 @@ const DEFAULT_SETTINGS: Settings = {
   sound: true,
   coordinates: true,
   hints: true,
+  help: true,
   theme: 'walnut',
   finish: 'classic',
   speed: 1,
@@ -52,6 +54,10 @@ interface GameState {
   turn: Color
   selected: string | null
   legalTargets: string[]
+  /** square the pointer is resting on, for the help-mode preview */
+  hoverSquare: string | null
+  /** where the hovered piece could go — empty unless help mode is on */
+  previewTargets: string[]
   lastMove: LastMove | null
   history: MoveEntry[]
   status: GameStatus
@@ -72,6 +78,7 @@ interface GameState {
   setMode: (mode: GameMode) => void
   setDifficulty: (d: Difficulty) => void
   selectSquare: (sq: string) => void
+  setHoverSquare: (sq: string | null) => void
   attemptMove: (from: string, to: string) => void
   choosePromotion: (t: 'q' | 'r' | 'b' | 'n') => void
   cancelPromotion: () => void
@@ -137,6 +144,40 @@ function describeLastMove(chess: Chess): LastMove | null {
 
 const START_HISTORY: MoveEntry[] = []
 
+type PreviewSource = Pick<
+  GameState,
+  | 'chess'
+  | 'settings'
+  | 'status'
+  | 'selected'
+  | 'thinking'
+  | 'mode'
+  | 'playerColor'
+  | 'turn'
+>
+
+/**
+ * Where the piece under the pointer could go.
+ *
+ * Help mode is a reading aid, so it stays honest: it only previews the side that
+ * is actually waiting for a person to move, it goes quiet while a piece is
+ * selected (the selection already draws its own targets), and it never leaks a
+ * move for the computer while it is thinking.
+ */
+function previewFor(state: PreviewSource, sq: string | null): string[] {
+  if (!sq || !state.settings.help) return []
+  if (state.selected) return []
+  if (state.status.kind !== 'playing') return []
+  if (state.thinking) return []
+  if (state.mode === 'cpu' && state.turn !== state.playerColor) return []
+  const piece = state.chess.get(sq as Square)
+  if (!piece || piece.color !== state.turn) return []
+  const moves = state.chess.moves({ square: sq as Square, verbose: true }) as unknown as Array<{
+    to: string
+  }>
+  return moves.map((m) => m.to)
+}
+
 function initState(partial?: Partial<GameState>) {
   const chess = new Chess()
   return {
@@ -145,6 +186,8 @@ function initState(partial?: Partial<GameState>) {
     turn: 'w' as Color,
     selected: null,
     legalTargets: [],
+    hoverSquare: null,
+    previewTargets: [],
     lastMove: null,
     history: START_HISTORY,
     status: computeStatus(chess),
@@ -165,8 +208,15 @@ export const useGame = create<GameState>((set, get) => ({
   pendingSound: null,
   settings: DEFAULT_SETTINGS,
 
-  setSetting: (key, value) =>
-    set((s) => ({ settings: { ...s.settings, [key]: value } })),
+  setSetting: (key, value) => {
+    set((s) => ({ settings: { ...s.settings, [key]: value } }))
+    if (key === 'help') {
+      // turning the mode on while the pointer is already resting on a piece
+      // should show that piece's moves right away
+      const s = get()
+      set({ previewTargets: previewFor(s, s.hoverSquare) })
+    }
+  },
 
   newGame: (opts) => {
     engineGeneration++
@@ -204,7 +254,7 @@ export const useGame = create<GameState>((set, get) => ({
 
     if (selected) {
       if (sq === selected) {
-        set({ selected: null, legalTargets: [] })
+        set({ selected: null, legalTargets: [], previewTargets: [] })
         return
       }
       const moves = chess.moves({ square: selected as Square, verbose: true }) as unknown as Array<{
@@ -220,10 +270,10 @@ export const useGame = create<GameState>((set, get) => ({
         const targets = (
           chess.moves({ square: sq as Square, verbose: true }) as unknown as Array<{ to: string }>
         ).map((m) => m.to)
-        set({ selected: sq, legalTargets: targets })
+        set({ selected: sq, legalTargets: targets, previewTargets: [] })
         return
       }
-      set({ selected: null, legalTargets: [] })
+      set({ selected: null, legalTargets: [], previewTargets: [] })
       return
     }
 
@@ -231,8 +281,14 @@ export const useGame = create<GameState>((set, get) => ({
       const targets = (
         chess.moves({ square: sq as Square, verbose: true }) as unknown as Array<{ to: string }>
       ).map((m) => m.to)
-      set({ selected: sq, legalTargets: targets })
+      set({ selected: sq, legalTargets: targets, previewTargets: [] })
     }
+  },
+
+  setHoverSquare: (sq) => {
+    const state = get()
+    if (state.hoverSquare === sq) return
+    set({ hoverSquare: sq, previewTargets: previewFor(state, sq) })
   },
 
   attemptMove: (from, to) => {
@@ -245,7 +301,12 @@ export const useGame = create<GameState>((set, get) => ({
     const match = probes.find((m) => m.to === to)
     if (!match) return
     if (match.promotion) {
-      set({ promotion: { from, to, color: chess.turn() }, selected: null, legalTargets: [] })
+      set({
+        promotion: { from, to, color: chess.turn() },
+        selected: null,
+        legalTargets: [],
+        previewTargets: [],
+      })
       return
     }
     applyMove(get, set, { from, to })
@@ -294,6 +355,8 @@ export const useGame = create<GameState>((set, get) => ({
       turn: chess.turn(),
       selected: null,
       legalTargets: [],
+      hoverSquare: null,
+      previewTargets: [],
       lastMove: describeLastMove(chess),
       history: historyEntries(chess),
       status: computeStatus(chess),
@@ -438,6 +501,8 @@ function applyMove(
     turn: chess.turn(),
     selected: null,
     legalTargets: [],
+    hoverSquare: null,
+    previewTargets: [],
     lastMove: {
       from: result.from,
       to: result.to,

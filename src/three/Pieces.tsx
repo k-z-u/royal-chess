@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { getPieceGeometry } from './pieceGeometry'
 import type { SceneMaterials } from './materials'
 import { squareToWorld } from '../game/squares'
+import { SURFACE_Y } from './Board'
 import { useGame, type PieceOnBoard } from '../game/store'
 import type { Color, PieceType } from '../game/types'
 
@@ -111,7 +112,9 @@ const Piece = memo(function Piece({ piece, selected, checked, materials, speed }
       }
     }
 
-    const targetLift = selected ? 0.08 : 0
+    // the piece is rooted below the board surface, so a lift has to clear it
+    // before it is visible at all
+    const targetLift = selected ? SURFACE_Y + 0.07 : 0
     lift.current += (targetLift - lift.current) * Math.min(1, dt * 9)
 
     spawn.current.t += dt

@@ -4,8 +4,10 @@ import * as THREE from 'three'
 import { squareToWorld } from '../game/squares'
 import { useGame } from '../game/store'
 import { makeGlowTexture } from './textures'
+import { SURFACE_Y } from './Board'
 
-const Y = 0.008
+// every overlay sits just above the square surface, or the plates bury it
+const Y = SURFACE_Y + 0.002
 
 function SquareTint({
   square,
@@ -28,6 +30,8 @@ function SquareTint({
 export function Highlights() {
   const selected = useGame((s) => s.selected)
   const legalTargets = useGame((s) => s.legalTargets)
+  const hoverSquare = useGame((s) => s.hoverSquare)
+  const previewTargets = useGame((s) => s.previewTargets)
   const lastMove = useGame((s) => s.lastMove)
   const pieces = useGame((s) => s.pieces)
   const status = useGame((s) => s.status)
@@ -145,6 +149,32 @@ export function Highlights() {
             </mesh>
           )
         })}
+
+      {/* help mode: quieter than the selection, so the two never read the same */}
+      {hoverSquare && previewTargets.length > 0 && (
+        <>
+          <SquareTint square={hoverSquare} color="#f2d9a4" opacity={0.13} />
+          {previewTargets.map((t) => {
+            const [x, , z] = squareToWorld(t)
+            const isCapture = occupied.has(t)
+            return (
+              <mesh
+                key={`preview-${t}`}
+                geometry={isCapture ? ringGeo : dotGeo}
+                position={[x, Y + 0.0012, z]}
+                renderOrder={4}
+              >
+                <meshBasicMaterial
+                  color={isCapture ? '#e8b070' : '#f0e6d0'}
+                  transparent
+                  opacity={isCapture ? 0.72 : 0.55}
+                  depthWrite={false}
+                />
+              </mesh>
+            )
+          })}
+        </>
+      )}
 
       {checkSquare && (
         <>

@@ -229,6 +229,12 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
 
       <div className="toggles">
         <Toggle
+          label="Help mode"
+          hint="Hover a piece to see where it can move"
+          value={settings.help}
+          onChange={(v) => setSetting('help', v)}
+        />
+        <Toggle
           label="Move hints"
           hint="Show legal destinations for the selected piece"
           value={settings.hints}

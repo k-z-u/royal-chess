@@ -34,7 +34,8 @@
     "prepublishOnly": "npm run build",
     "verify:engine": "node scripts/verify-engine.mjs",
     "verify:ui": "node scripts/ui-check.mjs",
-    "verify": "npm run build && npm run verify:engine"
+    "verify": "npm run build && npm run verify:engine",
+    "deploy": "npm run build && node scripts/deploy-pages.mjs"
   },
   "devDependencies": {
     "@react-three/drei": "^10.7.8",

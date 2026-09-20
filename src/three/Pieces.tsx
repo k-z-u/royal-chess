@@ -1,7 +1,12 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { getPieceGeometry } from './pieceGeometry'
+import {
+  getPieceGeometry,
+  isKingModelReady,
+  loadKingModel,
+  subscribeKingModel,
+} from './pieceGeometry'
 import type { SceneMaterials } from './materials'
 import { squareToWorld } from '../game/squares'
 import { SURFACE_Y } from './Board'
@@ -34,11 +39,25 @@ interface PieceProps {
   checked: boolean
   materials: SceneMaterials
   speed: number
+  /** bumped when an override model loads, so memoised pieces swap geometry */
+  geoVersion: number
 }
 
-const Piece = memo(function Piece({ piece, selected, checked, materials, speed }: PieceProps) {
+const Piece = memo(function Piece({
+  piece,
+  selected,
+  checked,
+  materials,
+  speed,
+  geoVersion,
+}: PieceProps) {
   const groupRef = useRef<THREE.Group>(null)
-  const geometry = getPieceGeometry(piece.type as PieceType)
+  const geometry = useMemo(() => {
+    // bumping geoVersion when an override model lands re-reads the geometry,
+    // which is what swaps the procedural king for the Blender one
+    void geoVersion
+    return getPieceGeometry(piece.type as PieceType)
+  }, [piece.type, geoVersion])
 
   // a king in check gets its own material so it can glow on its own
   const material = useMemo(() => {
@@ -170,6 +189,12 @@ export function Pieces({
   const anim = useGame((s) => s.anim)
   void anim
 
+  // re-render once the Blender-authored king has finished loading
+  const kingReady = useSyncExternalStore(subscribeKingModel, isKingModelReady)
+  useEffect(() => {
+    void loadKingModel('./models/king.glb')
+  }, [])
+
   const checkedKing = useMemo(() => {
     if (status.kind !== 'playing' || !status.check) return null
     const king = pieces.find((p) => p.type === 'k' && p.color === status.check)
@@ -186,6 +211,7 @@ export function Pieces({
           checked={checkedKing === p.square}
           materials={materials}
           speed={speed}
+          geoVersion={kingReady ? 1 : 0}
         />
       ))}
     </group>

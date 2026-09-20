@@ -3,8 +3,9 @@
 A refined 3D chess game that runs entirely in the browser — a full tournament-rules
 engine, a thinking opponent, and a premium dark board you can orbit and zoom.
 
-No external 3D models: every piece is generated in code, so the whole game is a
-single self-contained bundle.
+Every piece is generated in code, so the whole game is a single self-contained
+bundle. The king can optionally be swapped for a Blender-authored mesh — see
+[Modelling the king](#modelling-the-king).
 
 ## Play
 
@@ -68,6 +69,7 @@ npm run lint            # oxlint
 npm run build
 npm start -- --port 4173 --no-open &
 node scripts/ui-check.mjs http://127.0.0.1:4173/
+node scripts/check-king-model.mjs http://127.0.0.1:4173/  # the Blender king reaches the board
 node scripts/probe.mjs    http://127.0.0.1:4173/    # real clicks via the camera matrices
 node scripts/visual.mjs   http://127.0.0.1:4173/    # states worth eyeballing
 ```
@@ -78,6 +80,36 @@ node scripts/visual.mjs   http://127.0.0.1:4173/    # states worth eyeballing
 - `scripts/ui-check.mjs` — headless Playwright pass over selection, illegal moves,
   promotion, en passant, castling, checkmate, undo, the CPU reply and view flip,
   plus responsive screenshots.
+- `scripts/check-king-model.mjs` — asserts `models/king.glb` loads and that the
+  two kings on the board render its mesh, not the procedural fallback.
+- `scripts/inspect-king.mjs` — dumps the GLB's attributes, orientation and size.
+
+## Modelling the king
+
+The other five pieces are lathes built at runtime in `src/three/pieceGeometry.ts`.
+The king can be replaced by a real modelling-app mesh without touching the game
+logic:
+
+```bash
+KING_EXPORT=1 blender --background --python scripts/blender-king.py
+```
+
+That builds the king from the same profile the game uses, writes
+`public/models/king.glb` (9.5 cm, the standard tournament king height — the game
+rescales it to the height table in `pieceGeometry.ts`) and drops a `.blend` in
+`scripts/.build/`. The GLB has no UVs, so the loader generates cylindrical ones,
+which keeps the wood grain reading like the turned pieces.
+
+At runtime the game renders the procedural king immediately and swaps in the GLB
+once it arrives (via `loadKingModel`), so a slow or missing model never leaves a
+hole on the board. `node scripts/inspect-king.mjs` reports the mesh's attributes,
+orientation and real-world size.
+
+Inspect the result with:
+
+```bash
+node scripts/inspect-king.mjs
+```
 
 ## Tech
 

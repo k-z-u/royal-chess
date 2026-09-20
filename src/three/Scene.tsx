@@ -18,7 +18,9 @@ const TARGET = new THREE.Vector3(0, 0.32, 0)
 
 function CameraRig() {
   const camera = useThree((s) => s.camera)
+  const scene = useThree((s) => s.scene)
   useEffect(() => expose('__camera', camera), [camera])
+  useEffect(() => expose('__scene', scene), [scene])
   const size = useThree((s) => s.size)
   const controls = useThree((s) => s.controls) as { update: () => void } | null
   const viewFrom = useGame((s) => s.viewFrom)

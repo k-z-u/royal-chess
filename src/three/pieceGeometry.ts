@@ -1,5 +1,7 @@
 import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { PieceType } from '../game/types'
 
 const SEG = 96
@@ -323,6 +325,82 @@ function knightBase(): THREE.BufferGeometry {
   return lathe(p)
 }
 
+/**
+ * A Blender-authored stand-in for the turned king.
+ *
+ * scripts/blender-king.py builds the king from the same profile and publishes
+ * it to public/models/king.glb; loading swaps it in over the procedural one.
+ * Until it lands (or if the fetch fails) the procedural king keeps rendering,
+ * so the board is never missing a piece.
+ */
+let kingOverride: THREE.BufferGeometry | null = null
+let kingReady = false
+let kingLoad: Promise<void> | null = null
+const kingListeners = new Set<() => void>()
+
+export function subscribeKingModel(onChange: () => void): () => void {
+  kingListeners.add(onChange)
+  return () => {
+    kingListeners.delete(onChange)
+  }
+}
+
+export function isKingModelReady(): boolean {
+  return kingReady
+}
+
+/** Cylindrical UVs — the same mapping a lathe would give, for the wood grain. */
+function cylindricalUVs(g: THREE.BufferGeometry): void {
+  if (g.attributes.uv) return
+  g.computeBoundingBox()
+  const box = g.boundingBox
+  if (!box) return
+  const height = Math.max(box.max.y - box.min.y, 1e-6)
+  const pos = g.attributes.position
+  const uv = new Float32Array(pos.count * 2)
+  for (let i = 0; i < pos.count; i++) {
+    uv[i * 2] = Math.atan2(pos.getZ(i), pos.getX(i)) / (Math.PI * 2) + 0.5
+    uv[i * 2 + 1] = (pos.getY(i) - box.min.y) / height
+  }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
+}
+
+/** Fetch the Blender king and swap it in; safe to call more than once. */
+export function loadKingModel(url: string): Promise<void> {
+  if (kingReady) return Promise.resolve()
+  if (kingLoad) return kingLoad
+  kingLoad = (async () => {
+    try {
+      const loader = new GLTFLoader()
+      const gltf = await new Promise<GLTF>((resolve, reject) => {
+        loader.load(url, resolve, undefined, reject)
+      })
+      const geos: THREE.BufferGeometry[] = []
+      gltf.scene.updateMatrixWorld(true)
+      gltf.scene.traverse((o) => {
+        const mesh = o as THREE.Mesh
+        if (!mesh.isMesh) return
+        const g = mesh.geometry.clone()
+        g.applyMatrix4(mesh.matrixWorld)
+        geos.push(g)
+      })
+      if (geos.length) {
+        const merged =
+          geos.length === 1
+            ? geos[0]
+            : mergeAll(geos.map((g) => (g.index ? g.toNonIndexed() : g)))
+        cylindricalUVs(merged)
+        kingOverride = normalize(merged, TARGET_HEIGHT.k)
+        kingReady = true
+        for (const listener of kingListeners) listener()
+      }
+    } catch {
+      // the procedural king stays on the board
+    }
+  })()
+  return kingLoad
+}
+
 /** Distinct silhouette heights, so a piece's worth reads at a glance. */
 const TARGET_HEIGHT: Record<PieceType, number> = {
   p: 0.6,
@@ -359,6 +437,7 @@ function normalize(g: THREE.BufferGeometry, target: number): THREE.BufferGeometr
 const cache = new Map<PieceType, THREE.BufferGeometry>()
 
 export function getPieceGeometry(type: PieceType): THREE.BufferGeometry {
+  if (type === 'k' && kingOverride) return kingOverride
   const hit = cache.get(type)
   if (hit) return hit
   let g: THREE.BufferGeometry

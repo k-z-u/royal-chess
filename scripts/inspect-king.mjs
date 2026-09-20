@@ -45,3 +45,30 @@ console.log(
     ? 'orientation: Y-up (matches three.js, no fix needed)'
     : 'orientation: NOT Y-up — needs correction',
 )
+
+// radius profile — the quickest way to confirm an ornament actually stands
+// proud of the body instead of being swallowed by it
+const radiusByHeight = (() => {
+  const bins = new Array(20).fill(0)
+  let count = 0
+  gltf.scene.traverse((o) => {
+    if (!o.isMesh) return
+    const pos = o.geometry.attributes.position
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i)
+      const y = pos.getY(i)
+      const z = pos.getZ(i)
+      const bin = Math.min(bins.length - 1, Math.floor((y / size.y) * bins.length))
+      bins[bin] = Math.max(bins[bin], Math.hypot(x, z))
+      count++
+    }
+  })
+  return { bins, count }
+})()
+
+console.log(`\nradius profile over ${radiusByHeight.count} vertices (max radius per 5% of height):`)
+radiusByHeight.bins.forEach((r, i) => {
+  const pct = (i * 5).toString().padStart(3)
+  const bar = '#'.repeat(Math.round((r / Math.max(...radiusByHeight.bins)) * 34))
+  console.log(`  ${pct}%  ${(r * 1000).toFixed(1).padStart(5)} mm  ${bar}`)
+})

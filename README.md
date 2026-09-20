@@ -82,7 +82,9 @@ node scripts/visual.mjs   http://127.0.0.1:4173/    # states worth eyeballing
   plus responsive screenshots.
 - `scripts/check-king-model.mjs` — asserts `models/king.glb` loads and that the
   two kings on the board render its mesh, not the procedural fallback.
-- `scripts/inspect-king.mjs` — dumps the GLB's attributes, orientation and size.
+- `scripts/inspect-king.mjs` — dumps the GLB's attributes, orientation, size and
+  radius-by-height profile, which is how you check that an ornament actually
+  stands proud of the body instead of being swallowed by it.
 
 ## Modelling the king
 
@@ -94,11 +96,16 @@ logic:
 KING_EXPORT=1 blender --background --python scripts/blender-king.py
 ```
 
-That builds the king from the same profile the game uses, writes
-`public/models/king.glb` (9.5 cm, the standard tournament king height — the game
-rescales it to the height table in `pieceGeometry.ts`) and drops a `.blend` in
-`scripts/.build/`. The GLB has no UVs, so the loader generates cylindrical ones,
-which keeps the wood grain reading like the turned pieces.
+That writes `public/models/king.glb` (9.5 cm, the standard tournament king height
+— the game rescales it to the height table in `pieceGeometry.ts`) and drops a
+`.blend` in `scripts/.build/`. The GLB has no UVs, so the loader generates
+cylindrical ones, which keeps the wood grain reading like the turned pieces.
+
+The turned body follows the game's own profile, but the crown is composed in
+Blender: a jewelled band, eight fleurons flanked by pearls, jewel rings at the
+cove and shoulder, and the only cross on the board. Because the cross makes the
+piece taller and the game normalises by height, the body is widened by `GIRTH`
+to keep the king as massive as the queen.
 
 At runtime the game renders the procedural king immediately and swaps in the GLB
 once it arrives (via `loadKingModel`), so a slow or missing model never leaves a

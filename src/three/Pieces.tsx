@@ -12,6 +12,16 @@ function easeInOut(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
+/**
+ * Resting position for a piece: centred on its square and standing on the
+ * square surface. The board's zero plane sits below the tiles, so pieces must
+ * be lifted by SURFACE_Y or they sink into the plates.
+ */
+function squareRestPos(sq: string): [number, number, number] {
+  const [x, , z] = squareToWorld(sq)
+  return [x, SURFACE_Y, z]
+}
+
 function easeOutBack(t: number) {
   const c1 = 1.4
   const c3 = c1 + 1
@@ -47,7 +57,7 @@ const Piece = memo(function Piece({ piece, selected, checked, materials, speed }
     }
   }, [material, checked])
 
-  const pos = useRef(new THREE.Vector3(...squareToWorld(piece.square)))
+  const pos = useRef(new THREE.Vector3(...squareRestPos(piece.square)))
   const anim = useRef({
     from: new THREE.Vector3(),
     to: new THREE.Vector3(),
@@ -75,13 +85,13 @@ const Piece = memo(function Piece({ piece, selected, checked, materials, speed }
 
     if (!seeded.current) {
       seeded.current = true
-      pos.current.set(...squareToWorld(piece.square))
+      pos.current.set(...squareRestPos(piece.square))
       g.position.copy(pos.current)
       g.scale.setScalar(0.9)
     }
 
     if (prevSquare.current !== piece.square) {
-      const to = squareToWorld(piece.square)
+      const to = squareRestPos(piece.square)
       anim.current.from.copy(pos.current)
       anim.current.to.set(to[0], to[1], to[2])
       anim.current.t = 0
@@ -112,9 +122,9 @@ const Piece = memo(function Piece({ piece, selected, checked, materials, speed }
       }
     }
 
-    // the piece is rooted below the board surface, so a lift has to clear it
-    // before it is visible at all
-    const targetLift = selected ? SURFACE_Y + 0.07 : 0
+    // pieces now rest on the board surface, so a selection lift is a small
+    // hop above that resting height
+    const targetLift = selected ? 0.07 : 0
     lift.current += (targetLift - lift.current) * Math.min(1, dt * 9)
 
     spawn.current.t += dt

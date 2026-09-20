@@ -43,12 +43,12 @@ export const PIECE_GLYPH: Record<PieceType, string> = {
 }
 
 export const PIECE_NAME: Record<PieceType, string> = {
-  k: 'King',
-  q: 'Queen',
-  r: 'Rook',
-  b: 'Bishop',
-  n: 'Knight',
-  p: 'Pawn',
+  k: 'キング',
+  q: 'クイーン',
+  r: 'ルーク',
+  b: 'ビショップ',
+  n: 'ナイト',
+  p: 'ポーン',
 }
 
 export const PIECE_VALUE: Record<PieceType, number> = {

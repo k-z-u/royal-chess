@@ -52,35 +52,35 @@ function StatusText() {
   if (status.kind === 'checkmate') {
     return (
       <span className="status-strong">
-        Checkmate · {status.winner === 'w' ? 'White' : 'Black'} wins
+        チェックメイト · {status.winner === 'w' ? '白' : '黒'}の勝ち
       </span>
     )
   }
   if (status.kind === 'stalemate') {
-    return <span className="status-strong">Stalemate · Draw</span>
+    return <span className="status-strong">ステイルメイト · 引き分け</span>
   }
   if (status.kind === 'draw') {
     const reason =
       status.reason === 'threefold'
-        ? 'threefold repetition'
+        ? '同一局面の3回反復'
         : status.reason === 'fifty'
-          ? 'fifty-move rule'
-          : 'insufficient material'
-    return <span className="status-strong">Draw · {reason}</span>
+          ? '50手ルール'
+          : '戦力不足'
+    return <span className="status-strong">引き分け · {reason}</span>
   }
-  const side = turn === 'w' ? 'White' : 'Black'
+  const side = turn === 'w' ? '白' : '黒'
   const isCpu = mode === 'cpu' && thinking
   return (
     <span>
       <span className={`turn-dot ${turn}`} />
       {isCpu ? (
         <>
-          Computer is thinking<span className="dots" />
+          コンピューターが考えています<span className="dots" />
         </>
       ) : (
         <>
-          {side} to move
-          {status.check ? <em className="check-flag"> · Check</em> : null}
+          {side}の手番
+          {status.check ? <em className="check-flag"> · チェック</em> : null}
         </>
       )}
     </span>
@@ -90,7 +90,7 @@ function StatusText() {
 function LastMoveChip() {
   const lastMove = useGame((s) => s.lastMove)
   const history = useGame((s) => s.history)
-  if (!lastMove) return <span className="muted">No moves yet</span>
+  if (!lastMove) return <span className="muted">まだ着手はありません</span>
   const san = history.length ? history[history.length - 1].san : ''
   return (
     <span className="lastmove">
@@ -127,7 +127,7 @@ function PlayerCard({ side }: { side: Color }) {
   const { captured, score } = useCaptured()
 
   const isHuman = mode === 'human' || playerColor === side
-  const name = mode === 'human' ? (side === 'w' ? 'White' : 'Black') : isHuman ? 'You' : 'Computer'
+  const name = mode === 'human' ? (side === 'w' ? '白' : '黒') : isHuman ? 'あなた' : 'コンピューター'
   const diff = score[side] - score[OPPOSITE[side]]
   const active = status.kind === 'playing' && turn === side
 
@@ -140,11 +140,11 @@ function PlayerCard({ side }: { side: Color }) {
         <div className="player-line">
           <span className="player-name">{name}</span>
           {mode === 'cpu' && (
-            <span className="player-side">{side === 'w' ? 'White' : 'Black'}</span>
+            <span className="player-side">{side === 'w' ? '白' : '黒'}</span>
           )}
           {diff > 0 && <span className="player-adv">+{diff}</span>}
           {mode === 'cpu' && !isHuman && thinking && active && (
-            <span className="player-thinking">thinking<span className="dots" /></span>
+            <span className="player-thinking">思考中<span className="dots" /></span>
           )}
         </div>
         <CapturedRow pieces={captured[OPPOSITE[side]]} color={OPPOSITE[side]} />
@@ -174,7 +174,7 @@ function MoveList() {
 
   return (
     <div className="movelist" ref={scrollRef}>
-      {rows.length === 0 && <div className="movelist-empty">Moves will appear here</div>}
+      {rows.length === 0 && <div className="movelist-empty">ここに着手が表示されます</div>}
       {rows.map((row) => (
         <div className="move-row" key={row.n}>
           <span className="move-no">{row.n}</span>
@@ -218,37 +218,37 @@ export function Hud({
         <div className="brand">
           <IconCrown size={17} className="brand-icon" />
           <span className="brand-text">
-            Royal <span className="brand-thin">Chess</span>
+            ロイヤル<span className="brand-thin">チェス</span>
           </span>
         </div>
         <div className="topbar-actions">
-          <button className="tbtn" onClick={onNewGame} title="New game">
+          <button className="tbtn" onClick={onNewGame} title="新しい対局">
             <IconNew />
-            <span>New</span>
+            <span>新規</span>
           </button>
-          <button className="tbtn" onClick={undo} disabled={!canUndo} title="Undo move">
+          <button className="tbtn" onClick={undo} disabled={!canUndo} title="一手戻す">
             <IconUndo />
-            <span>Undo</span>
+            <span>戻す</span>
           </button>
-          <button className="tbtn" onClick={toggleView} title="Flip board">
+          <button className="tbtn" onClick={toggleView} title="盤面を反転">
             <IconFlip />
-            <span>Flip</span>
+            <span>反転</span>
           </button>
           <button
             className="tbtn icon-only mobile-only"
             onClick={onToggleMoveList}
-            title="Moves"
+            title="棋譜"
           >
             <IconList />
           </button>
           <button
             className="tbtn icon-only"
             onClick={() => setSetting('sound', !sound)}
-            title={sound ? 'Mute' : 'Unmute'}
+            title={sound ? 'ミュート' : 'ミュート解除'}
           >
             {sound ? <IconSound /> : <IconMute />}
           </button>
-          <button className="tbtn icon-only" onClick={onSettings} title="Settings">
+          <button className="tbtn icon-only" onClick={onSettings} title="設定">
             <IconSettings />
           </button>
         </div>
@@ -267,7 +267,7 @@ export function Hud({
           <StatusText />
         </div>
         <div className="status-sub">
-          <span className="status-label">Last move</span>
+          <span className="status-label">直前の手</span>
           <LastMoveChip />
         </div>
       </div>

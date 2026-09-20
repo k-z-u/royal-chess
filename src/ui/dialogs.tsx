@@ -4,6 +4,12 @@ import { PIECE_GLYPH } from '../game/squares'
 import type { Color, Difficulty, GameMode } from '../game/types'
 import { IconClose } from './Icons'
 
+const THEME_LABEL: Record<'walnut' | 'charcoal' | 'marble', string> = {
+  walnut: 'ウォールナット',
+  charcoal: 'チャコール',
+  marble: 'マーブル',
+}
+
 function Modal({
   children,
   onClose,
@@ -30,7 +36,7 @@ function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         {onClose && (
-          <button className="modal-close" onClick={onClose} aria-label="Close">
+          <button className="modal-close" onClick={onClose} aria-label="閉じる">
             <IconClose size={16} />
           </button>
         )}
@@ -77,60 +83,60 @@ export function NewGameDialog({ onClose }: { onClose: () => void }) {
   return (
     <Modal onClose={onClose} wide className="newgame">
       <div className="modal-head">
-        <h2>New game</h2>
-        <p>Choose your side and opponent.</p>
+        <h2>新しい対局</h2>
+        <p>手番と対戦相手を選びます。</p>
       </div>
 
       <div className="field">
-        <span className="field-label">Play as</span>
+        <span className="field-label">手番</span>
         <Segmented<Color>
           value={playerColor}
           onChange={(v) => {
             useGame.setState({ playerColor: v })
           }}
           options={[
-            { value: 'w', label: 'White' },
-            { value: 'b', label: 'Black' },
+            { value: 'w', label: '白' },
+            { value: 'b', label: '黒' },
           ]}
         />
       </div>
 
       <div className="field">
-        <span className="field-label">Opponent</span>
+        <span className="field-label">対戦相手</span>
         <Segmented<GameMode>
           value={mode}
           onChange={(v) => useGame.setState({ mode: v })}
           options={[
-            { value: 'cpu', label: 'Computer' },
-            { value: 'human', label: 'Two players' },
+            { value: 'cpu', label: 'コンピューター' },
+            { value: 'human', label: '2人対戦' },
           ]}
         />
       </div>
 
       {mode === 'cpu' && (
         <div className="field">
-          <span className="field-label">Strength</span>
+          <span className="field-label">強さ</span>
           <Segmented<Difficulty>
             value={difficulty}
             onChange={(v) => useGame.setState({ difficulty: v })}
             options={[
-              { value: 1, label: 'Casual', hint: 'Relaxed, makes mistakes' },
-              { value: 2, label: 'Club', hint: 'Solid club level' },
-              { value: 3, label: 'Master', hint: 'Thinks hardest' },
+              { value: 1, label: 'カジュアル', hint: 'のんびり、ミスもする' },
+              { value: 2, label: 'クラブ', hint: '堅実なクラブレベル' },
+              { value: 3, label: 'マスター', hint: '最も深く読む' },
             ]}
           />
         </div>
       )}
 
       <div className="field">
-        <span className="field-label">Board</span>
+        <span className="field-label">盤</span>
         <div className="swatches">
           {(['walnut', 'charcoal', 'marble'] as const).map((t) => (
             <button
               key={t}
               className={`swatch ${t} ${theme === t ? 'on' : ''}`}
               onClick={() => setSetting('theme', t)}
-              title={t}
+              title={THEME_LABEL[t]}
             >
               <span className="sw-l" />
               <span className="sw-d" />
@@ -140,14 +146,14 @@ export function NewGameDialog({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="field">
-        <span className="field-label">Pieces</span>
+        <span className="field-label">駒</span>
         <Segmented
           value={finish}
           onChange={(v) => setSetting('finish', v)}
           options={[
-            { value: 'classic', label: 'Boxwood' },
-            { value: 'stone', label: 'Stone' },
-            { value: 'brass', label: 'Metal' },
+            { value: 'classic', label: 'ツゲ' },
+            { value: 'stone', label: 'ストーン' },
+            { value: 'brass', label: 'メタル' },
           ]}
         />
       </div>
@@ -159,7 +165,7 @@ export function NewGameDialog({ onClose }: { onClose: () => void }) {
           onClose()
         }}
       >
-        Start game
+        対局開始
       </button>
     </Modal>
   )
@@ -172,83 +178,83 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
   return (
     <Modal onClose={onClose} className="settings">
       <div className="modal-head">
-        <h2>Settings</h2>
-        <p>Board, pieces and interface.</p>
+        <h2>設定</h2>
+        <p>盤・駒・インターフェース。</p>
       </div>
 
       <div className="field">
-        <span className="field-label">Board</span>
+        <span className="field-label">盤</span>
         <Segmented
           value={settings.theme}
           onChange={(v) => setSetting('theme', v)}
           options={[
-            { value: 'walnut', label: 'Walnut' },
-            { value: 'charcoal', label: 'Charcoal' },
-            { value: 'marble', label: 'Marble' },
+            { value: 'walnut', label: 'ウォールナット' },
+            { value: 'charcoal', label: 'チャコール' },
+            { value: 'marble', label: 'マーブル' },
           ]}
         />
       </div>
 
       <div className="field">
-        <span className="field-label">Pieces</span>
+        <span className="field-label">駒</span>
         <Segmented
           value={settings.finish}
           onChange={(v) => setSetting('finish', v)}
           options={[
-            { value: 'classic', label: 'Boxwood' },
-            { value: 'stone', label: 'Stone' },
-            { value: 'brass', label: 'Metal' },
+            { value: 'classic', label: 'ツゲ' },
+            { value: 'stone', label: 'ストーン' },
+            { value: 'brass', label: 'メタル' },
           ]}
         />
       </div>
 
       <div className="field">
-        <span className="field-label">Animation</span>
+        <span className="field-label">アニメーション</span>
         <Segmented
           value={settings.speed}
           onChange={(v) => setSetting('speed', v)}
           options={[
-            { value: 1.6, label: 'Quick' },
-            { value: 1, label: 'Normal' },
-            { value: 0.7, label: 'Slow' },
+            { value: 1.6, label: '速い' },
+            { value: 1, label: '普通' },
+            { value: 0.7, label: '遅い' },
           ]}
         />
       </div>
 
       <div className="field">
-        <span className="field-label">Graphics</span>
+        <span className="field-label">グラフィック</span>
         <Segmented
           value={settings.quality}
           onChange={(v) => setSetting('quality', v)}
           options={[
-            { value: 'high', label: 'High' },
-            { value: 'medium', label: 'Performance' },
+            { value: 'high', label: '高品質' },
+            { value: 'medium', label: '性能優先' },
           ]}
         />
       </div>
 
       <div className="toggles">
         <Toggle
-          label="Help mode"
-          hint="Hover a piece to see where it can move"
+          label="ヘルプ表示"
+          hint="駒にカーソルを合わせると動ける場所を表示"
           value={settings.help}
           onChange={(v) => setSetting('help', v)}
         />
         <Toggle
-          label="Move hints"
-          hint="Show legal destinations for the selected piece"
+          label="移動候補"
+          hint="選択した駒が動けるマスを表示"
           value={settings.hints}
           onChange={(v) => setSetting('hints', v)}
         />
         <Toggle
-          label="Coordinates"
-          hint="Show files and ranks around the board"
+          label="座標"
+          hint="盤の周囲にファイルとランクを表示"
           value={settings.coordinates}
           onChange={(v) => setSetting('coordinates', v)}
         />
         <Toggle
-          label="Sound"
-          hint="Soft wooden clicks on moves and captures"
+          label="サウンド"
+          hint="着手と駒取りでやわらかな木の音"
           value={settings.sound}
           onChange={(v) => setSetting('sound', v)}
         />
@@ -292,8 +298,8 @@ export function PromotionDialog() {
   return (
     <Modal onClose={cancel} className="promotion">
       <div className="modal-head">
-        <h2>Promote pawn</h2>
-        <p>Choose the piece to promote to.</p>
+        <h2>ポーンの昇格</h2>
+        <p>昇格する駒を選んでください。</p>
       </div>
       <div className="promo-grid">
         {options.map((t) => (
@@ -323,21 +329,21 @@ export function GameOverDialog({ onNewGame }: { onNewGame: () => void }) {
 
   if (status.kind === 'playing' || dismissed || !shown) return null
 
-  let title = 'Draw'
+  let title = '引き分け'
   let detail = ''
   if (status.kind === 'checkmate') {
-    title = `${status.winner === 'w' ? 'White' : 'Black'} wins`
-    detail = 'Checkmate'
+    title = `${status.winner === 'w' ? '白' : '黒'}の勝ち`
+    detail = 'チェックメイト'
   } else if (status.kind === 'stalemate') {
-    title = 'Draw'
-    detail = 'Stalemate — no legal moves'
+    title = '引き分け'
+    detail = 'ステイルメイト — 合法手なし'
   } else if (status.kind === 'draw') {
     detail =
       status.reason === 'threefold'
-        ? 'Threefold repetition'
+        ? '同一局面の3回反復'
         : status.reason === 'fifty'
-          ? 'Fifty-move rule'
-          : 'Insufficient material'
+          ? '50手ルール'
+          : '戦力不足'
   }
 
   return (
@@ -348,10 +354,10 @@ export function GameOverDialog({ onNewGame }: { onNewGame: () => void }) {
       </div>
       <div className="gameover-actions">
         <button className="primary" onClick={onNewGame}>
-          New game
+          新しい対局
         </button>
         <button className="ghost" onClick={() => setDismissed(true)}>
-          Review board
+          盤面を確認
         </button>
       </div>
     </Modal>

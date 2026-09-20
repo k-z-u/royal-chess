@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import type { PieceType } from '../game/types'
 
-const SEG = 64
+const SEG = 96
 
 /** Lathe geometries are indexed, ExtrudeGeometry is not — normalise before merging. */
 function mergeAll(geos: THREE.BufferGeometry[]): THREE.BufferGeometry {
@@ -13,10 +13,31 @@ function mergeAll(geos: THREE.BufferGeometry[]): THREE.BufferGeometry {
   return merged
 }
 
-function lathe(points: [number, number][]): THREE.BufferGeometry {
+function lathe(points: [number, number][], segments = SEG): THREE.BufferGeometry {
   const v = points.map(([x, y]) => new THREE.Vector2(Math.max(x, 0.0008), y))
-  const g = new THREE.LatheGeometry(v, SEG)
+  const g = new THREE.LatheGeometry(v, segments)
   g.computeVertexNormals()
+  return g
+}
+
+/** A turned collar — a horizontal torus ring sitting at height `y`. */
+function collar(radius: number, tube: number, y: number, segments = SEG): THREE.BufferGeometry {
+  const g = new THREE.TorusGeometry(radius, tube, 14, segments)
+  g.rotateX(Math.PI / 2)
+  g.translate(0, y, 0)
+  return g
+}
+
+function orb(radius: number, y: number, widthSeg = 24, heightSeg = 18): THREE.BufferGeometry {
+  const g = new THREE.SphereGeometry(radius, widthSeg, heightSeg)
+  g.translate(0, y, 0)
+  return g
+}
+
+/** A crown point: a cone whose base sits at `base` and rises `height`. */
+function spike(radius: number, height: number, base: number, x = 0, z = 0): THREE.BufferGeometry {
+  const g = new THREE.ConeGeometry(radius, height, 16)
+  g.translate(x, base + height / 2, z)
   return g
 }
 
@@ -70,35 +91,34 @@ function pawnProfile(): [number, number][] {
   return p
 }
 
+/** A tall, flat-topped tower, ready for the battlements to sit on the rim. */
 function rookProfile(): [number, number][] {
   const p = baseProfile()
   p.push(
     [0.19, 0.2],
-    [0.192, 0.24],
-    [0.196, 0.3],
-    [0.2, 0.36],
-    [0.202, 0.42],
-    [0.208, 0.45],
-    [0.228, 0.466],
-    [0.238, 0.478],
-    [0.234, 0.49],
-    [0.216, 0.5],
-    [0.208, 0.512],
-    [0.212, 0.532],
-    [0.228, 0.55],
-    [0.236, 0.566],
-    [0.236, 0.582],
-    [0.228, 0.594],
-    [0.212, 0.6],
-    [0.196, 0.602],
-    [0.19, 0.596],
-    [0.186, 0.582],
-    [0.182, 0.572],
-    [0.0, 0.57],
+    [0.194, 0.25],
+    [0.2, 0.32],
+    [0.206, 0.4],
+    [0.212, 0.47],
+    [0.222, 0.53],
+    [0.238, 0.575],
+    [0.262, 0.61],
+    [0.284, 0.638],
+    [0.294, 0.66],
+    [0.29, 0.678],
+    [0.272, 0.69],
+    [0.256, 0.696],
+    [0.262, 0.706],
+    [0.272, 0.714],
+    [0.272, 0.722],
+    [0.26, 0.728],
+    [0.236, 0.73],
+    [0.0, 0.724],
   )
   return p
 }
 
+/** Slender body tapering into a pointed mitre. */
 function bishopProfile(): [number, number][] {
   const p = baseProfile()
   p.push(
@@ -119,12 +139,12 @@ function bishopProfile(): [number, number][] {
     [0.222, 0.668],
     [0.206, 0.702],
     [0.176, 0.732],
-    [0.136, 0.756],
-    [0.09, 0.774],
-    [0.05, 0.786],
-    [0.022, 0.792],
-    [0.008, 0.8],
-    [0.0, 0.812],
+    [0.136, 0.758],
+    [0.09, 0.78],
+    [0.05, 0.798],
+    [0.022, 0.812],
+    [0.008, 0.824],
+    [0.0, 0.836],
   )
   return p
 }
@@ -205,55 +225,54 @@ function kingProfile(): [number, number][] {
 function rookCrown(): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = []
   const count = 6
-  const r = 0.203
-  const toothW = 0.115
-  const toothH = 0.085
-  const toothD = 0.052
+  const r = 0.24
+  const toothW = 0.12
+  const toothH = 0.098
+  const toothD = 0.055
   for (let i = 0; i < count; i++) {
     const a = (i / count) * Math.PI * 2 + Math.PI / count
     const g = new THREE.BoxGeometry(toothD, toothH, toothW)
-    g.translate(r, 0.598 + toothH / 2, 0)
+    g.translate(r, 0.704 + toothH / 2, 0)
     g.rotateY(a)
     parts.push(g)
   }
   return mergeAll(parts)
 }
 
-/** Coronet: ring of small spheres for the queen. */
+/** Coronet: a band of pointed spikes, each tipped with a bead — unmistakably a crown. */
 function queenCoronet(): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = []
-  const count = 9
-  const r = 0.198
+  const count = 8
+  const ringR = 0.19
+  const base = 0.78
+  const h = 0.16
+  parts.push(collar(0.212, 0.03, 0.776))
   for (let i = 0; i < count; i++) {
     const a = (i / count) * Math.PI * 2
-    const g = new THREE.SphereGeometry(0.036, 16, 12)
-    g.translate(Math.cos(a) * r, 0.83, Math.sin(a) * r)
-    parts.push(g)
+    const x = Math.cos(a) * ringR
+    const z = Math.sin(a) * ringR
+    parts.push(spike(0.052, h, base, x, z))
+    parts.push(orb(0.032, base + h + 0.01, 16, 12).translate(x, 0, z))
   }
-  const band = new THREE.TorusGeometry(0.196, 0.022, 12, 48)
-  band.rotateX(Math.PI / 2)
-  band.translate(0, 0.8, 0)
-  parts.push(band)
   return mergeAll(parts)
 }
 
+/** A tall cross rising from a crown band. */
 function kingCross(): THREE.BufferGeometry {
-  const v = new THREE.BoxGeometry(0.045, 0.15, 0.045)
-  v.translate(0, 0.9, 0)
-  const h = new THREE.BoxGeometry(0.045, 0.045, 0.115)
-  h.translate(0, 0.925, 0)
-  const ball = new THREE.SphereGeometry(0.028, 16, 12)
-  ball.translate(0, 0.978, 0)
-  return mergeAll([v, h, ball])
+  const parts: THREE.BufferGeometry[] = []
+  parts.push(collar(0.212, 0.028, 0.858))
+  const v = new THREE.BoxGeometry(0.05, 0.19, 0.05)
+  v.translate(0, 0.945, 0)
+  const h = new THREE.BoxGeometry(0.05, 0.05, 0.14)
+  h.translate(0, 0.975, 0)
+  parts.push(v, h)
+  parts.push(orb(0.03, 1.055, 18, 14))
+  return mergeAll(parts)
 }
 
+/** A bead sitting on the tip of the bishop's mitre. */
 function bishopFinial(): THREE.BufferGeometry {
-  const ball = new THREE.SphereGeometry(0.036, 20, 14)
-  ball.translate(0, 0.845, 0)
-  const collar = new THREE.TorusGeometry(0.048, 0.016, 12, 32)
-  collar.rotateX(Math.PI / 2)
-  collar.translate(0, 0.8, 0)
-  return mergeAll([ball, collar])
+  return orb(0.042, 0.862, 20, 14)
 }
 
 /** Stylised horse head for the knight, extruded with a soft bevel. */
@@ -286,8 +305,8 @@ function knightHead(): THREE.BufferGeometry {
   })
   g.translate(0, 0, -0.075 - 0.028)
   g.rotateY(-Math.PI / 2)
-  g.translate(0, 0.29, 0)
-  g.scale(1.18, 1.18, 1.18)
+  g.translate(0, 0.255, 0)
+  g.scale(0.95, 0.95, 0.95)
   g.computeVertexNormals()
   return g
 }
@@ -304,6 +323,39 @@ function knightBase(): THREE.BufferGeometry {
   return lathe(p)
 }
 
+/** Distinct silhouette heights, so a piece's worth reads at a glance. */
+const TARGET_HEIGHT: Record<PieceType, number> = {
+  p: 0.6,
+  r: 0.72,
+  n: 0.8,
+  b: 0.88,
+  q: 1.0,
+  k: 1.1,
+}
+
+/**
+ * Scale a piece uniformly to a known height and sit it on y = 0.
+ *
+ * Hand-tuning each profile to the target height is fragile; normalising means
+ * the height ordering is guaranteed no matter how the ornament is built.
+ */
+function normalize(g: THREE.BufferGeometry, target: number): THREE.BufferGeometry {
+  g.computeBoundingBox()
+  const box = g.boundingBox
+  if (box) {
+    const height = box.max.y - box.min.y
+    if (height > 0) {
+      const s = target / height
+      g.scale(s, s, s)
+    }
+  }
+  g.computeBoundingBox()
+  if (g.boundingBox) g.translate(0, -g.boundingBox.min.y, 0)
+  g.computeBoundingBox()
+  g.computeBoundingSphere()
+  return g
+}
+
 const cache = new Map<PieceType, THREE.BufferGeometry>()
 
 export function getPieceGeometry(type: PieceType): THREE.BufferGeometry {
@@ -312,35 +364,31 @@ export function getPieceGeometry(type: PieceType): THREE.BufferGeometry {
   let g: THREE.BufferGeometry
   switch (type) {
     case 'p':
-      g = lathe(pawnProfile())
+      g = mergeAll([lathe(pawnProfile()), collar(0.134, 0.016, 0.448)])
       break
     case 'r':
-      g = mergeAll([lathe(rookProfile()), rookCrown()])
+      g = mergeAll([lathe(rookProfile()), rookCrown(), collar(0.228, 0.02, 0.53)])
       break
     case 'n':
-      g = mergeAll([knightBase(), knightHead()])
+      g = mergeAll([knightBase(), knightHead(), collar(0.184, 0.018, 0.282)])
       break
     case 'b':
-      g = mergeAll([lathe(bishopProfile()), bishopFinial()])
+      g = mergeAll([lathe(bishopProfile()), bishopFinial(), collar(0.157, 0.018, 0.514)])
       break
     case 'q':
-      g = mergeAll([lathe(queenProfile()), queenCoronet()])
+      g = mergeAll([lathe(queenProfile()), queenCoronet(), collar(0.15, 0.018, 0.534)])
       break
     case 'k':
-      g = mergeAll([lathe(kingProfile()), kingCross()])
+      g = mergeAll([
+        lathe(kingProfile()),
+        kingCross(),
+        collar(0.157, 0.02, 0.548),
+      ])
       break
   }
-  g.computeVertexNormals()
-  g.computeBoundingSphere()
+  g = normalize(g, TARGET_HEIGHT[type])
   cache.set(type, g)
   return g
 }
 
-export const PIECE_HEIGHT: Record<PieceType, number> = {
-  p: 0.676,
-  r: 0.69,
-  n: 0.79,
-  b: 0.87,
-  q: 0.96,
-  k: 1.0,
-}
+export const PIECE_HEIGHT: Record<PieceType, number> = TARGET_HEIGHT

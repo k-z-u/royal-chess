@@ -25,5 +25,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify the engine against chess.js
+      - name: Verify the chess engine against chess.js
         run: npm run verify:engine
+
+      - name: Verify the shogi engine against tsshogi
+        run: npm run verify:shogi

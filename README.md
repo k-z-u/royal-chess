@@ -7,6 +7,11 @@ Every piece is generated in code, so the whole game is a single self-contained
 bundle. The king can optionally be swapped for a Blender-authored mesh — see
 [Modelling the king](#modelling-the-king).
 
+The same app also ships a **3D shogi variant** — full rules, drops, promotions, a
+from-scratch engine verified against tsshogi, pentagonal koma with kanji faces,
+and piece stands. Switch with the チェス / 将棋 toggle in the top bar, or deep-link
+with `?variant=shogi`.
+
 ## Play
 
 ```bash
@@ -31,6 +36,10 @@ Options:
 **Full chess rules** — castling, en passant, promotion, check, checkmate,
 stalemate, threefold repetition, the fifty-move rule and insufficient material.
 Illegal moves are impossible: the board only offers legal targets.
+
+**Full shogi rules** — drops, promotion and forced promotion, nifu, uchifuzume,
+repetition, KIF/USI notation and the same three difficulties, all from its own
+engine (`src/shogi/`, fully self-contained from the chess code).
 
 **A real opponent** — a from-scratch alpha-beta search with iterative deepening,
 quiescence search, move ordering and a hand-written evaluation, running in a Web
@@ -61,7 +70,8 @@ npm start            # serve the production build
 The project ships with its own test harnesses rather than trusting the eye alone:
 
 ```bash
-npm run verify:engine   # perft against chess.js, rules, tactics, speed, strength
+npm run verify:engine   # chess: perft against chess.js, rules, tactics, speed, strength
+npm run verify:shogi    # shogi: perft (to 19,861,490 nodes) against tsshogi, rules, tactics
 npm run lint            # oxlint
 ```
 
@@ -77,9 +87,15 @@ node scripts/visual.mjs   http://127.0.0.1:4173/    # states worth eyeballing
 - `scripts/verify-engine.mjs` — perft on six standard positions against chess.js,
   legality on tricky positions, mate-in-one, hanging-queen tactics and a match
   against a random mover.
+- `scripts/verify-shogi.mjs` — perft on the initial position to depth 5
+  (19,861,490 nodes, the published reference values), all 25,470 depth-3 positions
+  and 5,400 random positions cross-checked move-for-move against the independent
+  tsshogi library, plus repetition, uchifuzume, pinned-piece and notation tests.
 - `scripts/ui-check.mjs` — headless Playwright pass over selection, illegal moves,
   promotion, en passant, castling, checkmate, undo, the CPU reply and view flip,
   plus responsive screenshots.
+- `scripts/ui-check-shogi.mjs` — the same pass for the shogi variant: drops,
+  promotion dialog, checkmate, undo, the CPU reply, the stands and the view flip.
 - `scripts/check-king-model.mjs` — asserts `models/king.glb` loads and that the
   two kings on the board render its mesh, not the procedural fallback.
 - `scripts/inspect-king.mjs` — dumps the GLB's attributes, orientation, size and
@@ -121,8 +137,10 @@ node scripts/inspect-king.mjs
 ## Tech
 
 React · TypeScript · Three.js · React Three Fiber · drei · zustand · chess.js ·
-Vite. The engine is written from scratch and verified against chess.js; chess.js
-is used for the position model in the UI.
+Vite. Both engines are written from scratch — chess verified against chess.js,
+shogi verified against tsshogi; chess.js is also used for the chess UI's position
+model, and tsshogi is a dev-only dependency used by the verification script alone
+(the shipped bundle is self-contained).
 
 ## Licence
 

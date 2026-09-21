@@ -1,4 +1,4 @@
-:root {
+body.variant-shogi {
   --ink: #0a0b0d;
   --panel: rgba(20, 22, 26, 0.72);
   --panel-line: rgba(255, 255, 255, 0.075);
@@ -8,25 +8,26 @@
   --gold: #c8a45c;
   --gold-soft: #e6cd97;
   --danger: #d4655a;
+  --sente: #e8dcc0;
+  --gote: #9aa2b0;
   --radius: 14px;
   --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.55);
-  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
-  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, 'Helvetica Neue', Arial,
-    sans-serif;
+  --serif: 'Hiragino Mincho ProN', 'Yu Mincho', YuMincho, 'Noto Serif JP', 'Songti SC', Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP',
+    'Segoe UI', Inter, 'Helvetica Neue', Arial, sans-serif;
 }
 
-* {
+body.variant-shogi * {
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
+body.variant-shogi,
+  body.variant-shogi #root {
   height: 100%;
   margin: 0;
 }
 
-body {
+body.variant-shogi {
   background: var(--ink);
   color: var(--text);
   font-family: var(--sans);
@@ -35,27 +36,27 @@ body {
   overscroll-behavior: none;
 }
 
-button {
+body.variant-shogi button {
   font-family: inherit;
 }
 
-.app {
+body.variant-shogi .app {
   position: fixed;
   inset: 0;
   overflow: hidden;
 }
 
-.stage {
+body.variant-shogi .stage {
   position: absolute;
   inset: 0;
 }
 
-.stage canvas {
+body.variant-shogi .stage canvas {
   display: block;
   touch-action: none;
 }
 
-.vignette {
+body.variant-shogi .vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -64,18 +65,18 @@ button {
     linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0) 74%, rgba(0, 0, 0, 0.55) 100%);
 }
 
-.grain {
+body.variant-shogi .grain {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.16;
+  opacity: 0.14;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 }
 
 /* ---------------------------------------------------------------- top bar */
 
-.topbar {
+body.variant-shogi .topbar {
   position: absolute;
   top: 0;
   left: 0;
@@ -88,37 +89,38 @@ button {
   z-index: 10;
 }
 
-.brand {
+body.variant-shogi .brand {
   display: flex;
   align-items: center;
   gap: 10px;
   color: var(--gold);
 }
 
-.brand-icon {
+body.variant-shogi .brand-icon {
   opacity: 0.9;
 }
 
-.brand-text {
+body.variant-shogi .brand-text {
   font-family: var(--serif);
-  font-size: 13.5px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-size: 17px;
+  letter-spacing: 0.14em;
   color: var(--text);
 }
 
-.brand-thin {
+body.variant-shogi .brand-thin {
+  margin-left: 4px;
+  font-size: 12px;
+  letter-spacing: 0.24em;
   color: var(--muted);
-  font-weight: 400;
 }
 
-.topbar-actions {
+body.variant-shogi .topbar-actions {
   display: flex;
   gap: 8px;
   pointer-events: auto;
 }
 
-.tbtn {
+body.variant-shogi .tbtn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -128,38 +130,33 @@ button {
   background: var(--panel);
   color: #d6d0c5;
   font-size: 12.5px;
-  letter-spacing: 0.01em;
   cursor: pointer;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.18s ease;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
-.tbtn:hover:not(:disabled) {
+body.variant-shogi .tbtn:hover:not(:disabled) {
   background: rgba(38, 40, 46, 0.82);
   border-color: rgba(200, 164, 92, 0.28);
   color: #f2ede2;
 }
 
-.tbtn:active:not(:disabled) {
+body.variant-shogi .tbtn:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.tbtn:disabled {
+body.variant-shogi .tbtn:disabled {
   opacity: 0.32;
   cursor: default;
 }
 
-.tbtn.icon-only {
+body.variant-shogi .tbtn.icon-only {
   padding: 9px;
 }
 
-/* The chess / shogi switch. Two small tabs between the brand and the buttons. */
-.variant-switch {
+/* The chess / shogi switch — same skin as the chess top bar. */
+body.variant-shogi .variant-switch {
   display: flex;
   gap: 4px;
   padding: 4px;
@@ -169,7 +166,7 @@ button {
   pointer-events: auto;
 }
 
-.variant-btn {
+body.variant-shogi .variant-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -179,44 +176,41 @@ button {
   background: transparent;
   color: #9a958b;
   font-size: 12px;
-  letter-spacing: 0.01em;
   cursor: pointer;
-  transition:
-    background 0.18s ease,
-    color 0.18s ease;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
-.variant-btn:hover {
+body.variant-shogi .variant-btn:hover {
   color: #e8e2d6;
 }
 
-.variant-btn.on {
+body.variant-shogi .variant-btn.on {
   background: rgba(200, 164, 92, 0.16);
   color: #f2c66d;
 }
 
 @media (max-width: 760px) {
-  .variant-label {
+  body.variant-shogi .variant-label {
     display: none;
   }
 
-  .variant-btn {
+  body.variant-shogi .variant-btn {
     padding: 6px 8px;
   }
 }
 
-.mobile-only {
+body.variant-shogi .mobile-only {
   display: none;
 }
 
 /* ------------------------------------------------------------------ panel */
 
-.panel {
+body.variant-shogi .panel {
   position: absolute;
   right: 22px;
   top: 50%;
   transform: translateY(-50%);
-  width: 272px;
+  width: 288px;
   max-height: calc(100vh - 190px);
   display: flex;
   flex-direction: column;
@@ -230,13 +224,13 @@ button {
   z-index: 10;
 }
 
-.panel-divider {
+body.variant-shogi .panel-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.06);
   margin: 8px 4px;
 }
 
-.player-card {
+body.variant-shogi .player-card {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -245,149 +239,173 @@ button {
   transition: background 0.25s ease;
 }
 
-.player-card.active {
+body.variant-shogi .player-card.active {
   background: linear-gradient(90deg, rgba(200, 164, 92, 0.12), rgba(200, 164, 92, 0.02));
 }
 
-.player-avatar {
+body.variant-shogi .player-avatar {
   width: 38px;
   height: 38px;
   flex: 0 0 38px;
-  border-radius: 50%;
+  border-radius: 10px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.25));
-  font-size: 19px;
 }
 
-.player-body {
+body.variant-shogi .avatar-kanji {
+  font-family: var(--serif);
+  font-size: 20px;
+  line-height: 1;
+}
+
+body.variant-shogi .player-avatar.sente .avatar-kanji {
+  color: var(--sente);
+}
+
+body.variant-shogi .player-avatar.gote .avatar-kanji {
+  color: var(--gote);
+}
+
+body.variant-shogi .player-body {
   min-width: 0;
   flex: 1;
 }
 
-.player-line {
+body.variant-shogi .player-line {
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
 
-.player-name {
-  font-size: 13.5px;
+body.variant-shogi .player-name {
+  font-size: 13px;
   letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.player-side {
+body.variant-shogi .player-side {
   font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--muted-dim);
 }
 
-.player-adv {
-  font-size: 11.5px;
-  color: var(--gold-soft);
-  margin-left: auto;
-}
-
-.player-thinking {
+body.variant-shogi .player-thinking {
   font-size: 11px;
   color: var(--muted);
   margin-left: auto;
+  white-space: nowrap;
 }
 
-.captured-row {
+body.variant-shogi .hand-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 1px;
-  margin-top: 2px;
-  min-height: 15px;
+  gap: 4px;
+  margin-top: 5px;
+  min-height: 22px;
 }
 
-.captured-empty {
+body.variant-shogi .hand-empty {
+  font-size: 11px;
+  color: var(--muted-dim);
+  margin-top: 5px;
   display: block;
-  min-height: 15px;
 }
 
-.glyph {
+body.variant-shogi .hand-piece {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+  padding: 1px 4px 2px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.variant-shogi .hand-kanji {
   font-family: var(--serif);
+  font-size: 14px;
   line-height: 1;
 }
 
-.glyph.w {
-  color: #f2ece0;
+body.variant-shogi .hand-piece.sente .hand-kanji {
+  color: var(--sente);
 }
 
-.glyph.b {
-  color: #8b867c;
+body.variant-shogi .hand-piece.gote .hand-kanji {
+  color: var(--gote);
 }
 
-.glyph.small {
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-.glyph.large {
-  font-size: 34px;
+body.variant-shogi .hand-count {
+  font-size: 10px;
+  color: var(--muted);
+  margin-left: 1px;
 }
 
 /* --------------------------------------------------------------- movelist */
 
-.movelist {
+body.variant-shogi .movelist {
   flex: 1;
   overflow-y: auto;
-  min-height: 96px;
-  max-height: 32vh;
+  min-height: 110px;
+  max-height: 34vh;
   padding: 2px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
 }
 
-.movelist::-webkit-scrollbar {
+body.variant-shogi .movelist::-webkit-scrollbar {
   width: 6px;
 }
 
-.movelist::-webkit-scrollbar-thumb {
+body.variant-shogi .movelist::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.13);
   border-radius: 3px;
 }
 
-.movelist-empty {
+body.variant-shogi .movelist-empty {
   color: var(--muted-dim);
   font-size: 12px;
   padding: 14px 8px;
   text-align: center;
 }
 
-.move-row {
+body.variant-shogi .move-row {
   display: grid;
-  grid-template-columns: 28px 1fr 1fr;
+  grid-template-columns: 26px 1fr 1fr;
   align-items: center;
-  font-size: 13px;
+  font-size: 12.5px;
   font-variant-numeric: tabular-nums;
   padding: 3px 4px;
   border-radius: 7px;
 }
 
-.move-no {
+body.variant-shogi .move-no {
   color: var(--muted-dim);
   font-size: 11px;
 }
 
-.move-san {
+body.variant-shogi .move-kif {
   padding: 3px 6px;
   border-radius: 6px;
   color: #d8d2c7;
+  font-family: var(--serif);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.move-san.current {
+body.variant-shogi .move-kif.current {
   background: rgba(200, 164, 92, 0.14);
   color: var(--gold-soft);
 }
 
 /* --------------------------------------------------------------- status */
 
-.statusbar {
+body.variant-shogi .statusbar {
   position: absolute;
   left: 50%;
   bottom: 22px;
@@ -400,7 +418,7 @@ button {
   z-index: 10;
 }
 
-.status-pill {
+body.variant-shogi .status-pill {
   display: inline-flex;
   align-items: center;
   padding: 11px 20px;
@@ -410,19 +428,18 @@ button {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   font-size: 13.5px;
-  letter-spacing: 0.01em;
   color: #ded8cd;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
-.status-strong {
+body.variant-shogi .status-strong {
   font-family: var(--serif);
   font-size: 15px;
   letter-spacing: 0.03em;
   color: var(--gold-soft);
 }
 
-.status-sub {
+body.variant-shogi .status-sub {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -430,25 +447,50 @@ button {
   color: var(--muted);
 }
 
-.status-label {
+body.variant-shogi .status-label {
   font-size: 9.5px;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--muted-dim);
 }
 
-.lastmove {
+body.variant-shogi .status-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+body.variant-shogi .lastmove {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.lastmove-san {
+body.variant-shogi .lastmove-san {
   color: #ded8cd;
-  font-size: 12px;
+  font-family: var(--serif);
+  font-size: 12.5px;
 }
 
-.turn-dot {
+body.variant-shogi .lastmove-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+
+body.variant-shogi .eval-readout {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+body.variant-shogi .eval-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-soft);
+}
+
+body.variant-shogi .turn-dot {
   display: inline-block;
   width: 7px;
   height: 7px;
@@ -458,46 +500,39 @@ button {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
 }
 
-.turn-dot.w {
-  background: #f4efe4;
+body.variant-shogi .turn-dot.sente {
+  background: #f0e4c6;
 }
 
-.turn-dot.b {
-  background: #6f6a62;
+body.variant-shogi .turn-dot.gote {
+  background: #8d95a4;
 }
 
-.check-flag {
+body.variant-shogi .check-flag {
   color: var(--danger);
   font-style: normal;
+  font-family: var(--serif);
 }
 
-.muted {
+body.variant-shogi .muted {
   color: var(--muted-dim);
 }
 
-.dots::after {
+body.variant-shogi .dots::after {
   content: '';
   animation: dots 1.6s steps(1, end) infinite;
 }
 
 @keyframes dots {
-  0% {
-    content: '';
-  }
-  25% {
-    content: '.';
-  }
-  50% {
-    content: '..';
-  }
-  75% {
-    content: '...';
-  }
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
 }
 
 /* ---------------------------------------------------------------- modals */
 
-.overlay {
+body.variant-shogi .overlay {
   position: fixed;
   inset: 0;
   display: grid;
@@ -511,14 +546,12 @@ button {
 }
 
 @keyframes overlay-in {
-  from {
-    opacity: 0;
-  }
+  from { opacity: 0; }
 }
 
-.modal {
+body.variant-shogi .modal {
   position: relative;
-  width: min(92vw, 400px);
+  width: min(92vw, 410px);
   max-height: 90vh;
   overflow-y: auto;
   padding: 26px 26px 24px;
@@ -529,8 +562,8 @@ button {
   animation: modal-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.modal.wide {
-  width: min(94vw, 460px);
+body.variant-shogi .modal.wide {
+  width: min(94vw, 470px);
 }
 
 @keyframes modal-in {
@@ -540,7 +573,7 @@ button {
   }
 }
 
-.modal-close {
+body.variant-shogi .modal-close {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -556,39 +589,44 @@ button {
   transition: all 0.16s ease;
 }
 
-.modal-close:hover {
+body.variant-shogi .modal-close:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
 }
 
-.modal-head h2 {
+body.variant-shogi .modal-head h2 {
   margin: 0;
   font-family: var(--serif);
   font-size: 21px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
 
-.modal-head p {
+body.variant-shogi .modal-head p {
   margin: 6px 0 0;
   font-size: 12.5px;
   color: var(--muted);
 }
 
-.field {
+body.variant-shogi .field {
   margin-top: 20px;
 }
 
-.field-label {
+body.variant-shogi .field-label {
   display: block;
   margin-bottom: 8px;
   font-size: 10px;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--muted-dim);
 }
 
-.segmented {
+body.variant-shogi .field-note {
+  margin: 8px 2px 0;
+  font-size: 11.5px;
+  color: var(--muted-dim);
+}
+
+body.variant-shogi .segmented {
   display: flex;
   gap: 3px;
   padding: 3px;
@@ -597,7 +635,7 @@ button {
   background: rgba(255, 255, 255, 0.035);
 }
 
-.seg {
+body.variant-shogi .seg {
   flex: 1;
   padding: 9px 6px;
   border: none;
@@ -605,28 +643,27 @@ button {
   background: transparent;
   color: #b3ada2;
   font-size: 12.5px;
-  letter-spacing: 0.01em;
   cursor: pointer;
   transition: all 0.16s ease;
 }
 
-.seg:hover {
+body.variant-shogi .seg:hover {
   color: var(--text);
 }
 
-.seg.on {
+body.variant-shogi .seg.on {
   background: rgba(200, 164, 92, 0.15);
   color: #f2e2bf;
   box-shadow: inset 0 0 0 1px rgba(200, 164, 92, 0.28);
 }
 
-.swatches {
+body.variant-shogi .swatches {
   display: flex;
   gap: 8px;
 }
 
-.swatch {
-  width: 52px;
+body.variant-shogi .swatch {
+  width: 56px;
   height: 36px;
   display: flex;
   overflow: hidden;
@@ -637,40 +674,26 @@ button {
   transition: all 0.16s ease;
 }
 
-.swatch.on {
-  box-shadow:
-    0 0 0 1px rgba(200, 164, 92, 0.6),
-    0 6px 18px rgba(0, 0, 0, 0.4);
+body.variant-shogi .swatch.on {
+  box-shadow: 0 0 0 1px rgba(200, 164, 92, 0.6), 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
-.swatch span {
+body.variant-shogi .swatch span {
   flex: 1;
 }
 
-.swatch.walnut .sw-l {
-  background: linear-gradient(180deg, #d9bd8d, #b8965f);
-}
-.swatch.walnut .sw-d {
-  background: linear-gradient(180deg, #7c5030, #54341d);
-}
-.swatch.charcoal .sw-l {
-  background: linear-gradient(180deg, #a49e92, #857f74);
-}
-.swatch.charcoal .sw-d {
-  background: linear-gradient(180deg, #4a4640, #2c2a27);
-}
-.swatch.marble .sw-l {
-  background: linear-gradient(180deg, #efece5, #d5d1c7);
-}
-.swatch.marble .sw-d {
-  background: linear-gradient(180deg, #565c63, #343940);
-}
+body.variant-shogi .swatch.kaya .sw-l { background: linear-gradient(180deg, #f0d49f, #d9b475); }
+body.variant-shogi .swatch.kaya .sw-d { background: linear-gradient(180deg, #b98c4e, #8c6636); }
+body.variant-shogi .swatch.hinoki .sw-l { background: linear-gradient(180deg, #fbf0d6, #e8d7ae); }
+body.variant-shogi .swatch.hinoki .sw-d { background: linear-gradient(180deg, #d5b782, #b0904f); }
+body.variant-shogi .swatch.sumi .sw-l { background: linear-gradient(180deg, #4b453d, #33302b); }
+body.variant-shogi .swatch.sumi .sw-d { background: linear-gradient(180deg, #2a2723, #161513); }
 
-.toggles {
+body.variant-shogi .toggles {
   margin-top: 18px;
 }
 
-.toggle {
+body.variant-shogi .toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -685,22 +708,22 @@ button {
   cursor: pointer;
 }
 
-.toggle-text {
+body.variant-shogi .toggle-text {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 
-.toggle-label {
+body.variant-shogi .toggle-label {
   font-size: 13px;
 }
 
-.toggle-hint {
+body.variant-shogi .toggle-hint {
   font-size: 11px;
   color: var(--muted-dim);
 }
 
-.switch {
+body.variant-shogi .switch {
   position: relative;
   flex: 0 0 40px;
   width: 40px;
@@ -710,11 +733,11 @@ button {
   transition: background 0.2s ease;
 }
 
-.switch.on {
+body.variant-shogi .switch.on {
   background: rgba(200, 164, 92, 0.55);
 }
 
-.knob {
+body.variant-shogi .knob {
   position: absolute;
   top: 3px;
   left: 3px;
@@ -725,11 +748,11 @@ button {
   transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.switch.on .knob {
+body.variant-shogi .switch.on .knob {
   transform: translateX(17px);
 }
 
-.primary {
+body.variant-shogi .primary {
   width: 100%;
   margin-top: 24px;
   padding: 13px;
@@ -739,23 +762,21 @@ button {
   color: #1b1408;
   font-size: 13.5px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   cursor: pointer;
   box-shadow: 0 12px 28px rgba(201, 164, 95, 0.22);
-  transition:
-    transform 0.16s ease,
-    filter 0.16s ease;
+  transition: transform 0.16s ease, filter 0.16s ease;
 }
 
-.primary:hover {
+body.variant-shogi .primary:hover {
   filter: brightness(1.06);
 }
 
-.primary:active {
+body.variant-shogi .primary:active {
   transform: translateY(1px);
 }
 
-.ghost {
+body.variant-shogi .ghost {
   padding: 12px 20px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -766,42 +787,80 @@ button {
   transition: all 0.16s ease;
 }
 
-.ghost:hover {
+body.variant-shogi .ghost:hover {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text);
 }
 
-.promo-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-top: 20px;
+body.variant-shogi .ghost.wide {
+  width: 100%;
+  margin-top: 12px;
 }
 
-.promo-btn {
-  aspect-ratio: 1;
+body.variant-shogi .promo-actions {
   display: grid;
-  place-items: center;
-  border-radius: 13px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+body.variant-shogi .promo-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 10px 14px;
+  border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
   cursor: pointer;
   transition: all 0.16s ease;
 }
 
-.promo-btn:hover {
+body.variant-shogi .promo-btn:hover {
   background: rgba(200, 164, 92, 0.14);
   border-color: rgba(200, 164, 92, 0.4);
   transform: translateY(-2px);
 }
 
-.gameover-actions {
+body.variant-shogi .promo-kanji {
+  font-family: var(--serif);
+  font-size: 38px;
+  line-height: 1;
+  color: #f2e7cd;
+}
+
+body.variant-shogi .promo-kanji.promoted {
+  color: #e0705c;
+}
+
+body.variant-shogi .promo-label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+body.variant-shogi .summary {
+  display: flex;
+  gap: 22px;
+  margin-top: 20px;
+}
+
+body.variant-shogi .summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+body.variant-shogi .gameover-actions {
   display: flex;
   gap: 10px;
   margin-top: 24px;
 }
 
-.gameover-actions .primary {
+body.variant-shogi .gameover-actions .primary {
   margin-top: 0;
   flex: 1;
 }
@@ -809,33 +868,33 @@ button {
 /* ------------------------------------------------------------ responsive */
 
 @media (max-width: 1000px) {
-  .panel {
-    width: 248px;
+  body.variant-shogi .panel {
+    width: 258px;
   }
 }
 
 @media (max-width: 860px) {
-  .topbar {
+  body.variant-shogi .topbar {
     padding: 12px 14px;
   }
 
-  .tbtn span {
+  body.variant-shogi .tbtn span {
     display: none;
   }
 
-  .tbtn {
+  body.variant-shogi .tbtn {
     padding: 9px;
   }
 
-  .mobile-only {
+  body.variant-shogi .mobile-only {
     display: inline-flex;
   }
 
-  .panel {
+  body.variant-shogi .panel {
     display: none;
   }
 
-  .panel.open {
+  body.variant-shogi .panel.open {
     display: flex;
     position: fixed;
     top: auto;
@@ -848,36 +907,31 @@ button {
     z-index: 20;
   }
 
-  .movelist {
+  body.variant-shogi .movelist {
     max-height: 22vh;
   }
 
-  .statusbar {
+  body.variant-shogi .statusbar {
     bottom: 16px;
   }
 
-  .status-sub {
+  body.variant-shogi .status-sub {
     display: none;
-  }
-
-  .brand-text {
-    font-size: 12px;
-    letter-spacing: 0.16em;
   }
 }
 
 @media (max-width: 520px) {
-  .brand-text {
-    display: none;
+  body.variant-shogi .brand-text {
+    font-size: 14px;
   }
 
-  .modal {
+  body.variant-shogi .modal {
     padding: 22px 20px 20px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  body.variant-shogi * {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }

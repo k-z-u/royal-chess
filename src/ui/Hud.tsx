@@ -12,6 +12,7 @@ import {
   IconSound,
   IconUndo,
 } from './Icons'
+import { VariantSwitch } from '../VariantSwitch'
 
 const INITIAL_COUNT: Record<PieceType, number> = { p: 8, n: 2, b: 2, r: 2, q: 1, k: 1 }
 
@@ -221,6 +222,7 @@ export function Hud({
             ロイヤル<span className="brand-thin">チェス</span>
           </span>
         </div>
+        <VariantSwitch />
         <div className="topbar-actions">
           <button className="tbtn" onClick={onNewGame} title="新しい対局">
             <IconNew />

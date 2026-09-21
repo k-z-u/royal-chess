@@ -1,7 +1,7 @@
 {
   "name": "royal-chess",
   "version": "1.0.0",
-  "description": "A refined 3D chess game for the browser \u2014 full tournament rules, a real search engine opponent, and a premium dark board you can orbit and zoom.",
+  "description": "A refined 3D chess game for the browser — full tournament rules, a real search engine opponent, and a premium dark board you can orbit and zoom.",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -34,8 +34,10 @@
     "prepublishOnly": "npm run build",
     "verify:engine": "node scripts/verify-engine.mjs",
     "verify:ui": "node scripts/ui-check.mjs",
-    "verify": "npm run build && npm run verify:engine",
-    "deploy": "npm run build && node scripts/deploy-pages.mjs"
+    "verify": "npm run build && npm run verify:engine && npm run verify:shogi",
+    "deploy": "npm run build && node scripts/deploy-pages.mjs",
+    "verify:shogi": "node scripts/verify-shogi.mjs",
+    "verify:shogi-ui": "node scripts/ui-check-shogi.mjs"
   },
   "devDependencies": {
     "@react-three/drei": "^10.7.8",
@@ -51,6 +53,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "three": "^0.186.0",
+    "tsshogi": "^2.3.4",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "zustand": "^5.0.15"
